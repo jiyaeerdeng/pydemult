@@ -53,14 +53,17 @@ def demultiplex():
     else:
         logger.setLevel(logging.WARNING)
 
-    logger.debug('Working on {} using {} threads'.format(args.fastq, args.threads))
+    logger.debug(f'Working on {args.fastq} using {args.threads} threads')
 
     #
     # Check output folder
     #
     args.output = os.path.abspath(args.output) if args.output != None else os.path.abspath(os.getcwd())
     if not os.access(args.output, os.W_OK):
-        logger.error("Error: Directory {} does not exist or is not writeable.".format(args.output))
+        logger.error(
+            f"Error: Directory {args.output} does not exist or is not writeable."
+        )
+
         sys.exit(1)
 
     #
@@ -84,7 +87,10 @@ def demultiplex():
 
     logger.debug('Found barcodes:' + ','.join(barcodes))
 
-    logger.debug('Creating mutation hash with edit distance {} for {} barcodes.'.format(args.edit_distance, len(barcodes)))
+    logger.debug(
+        f'Creating mutation hash with edit distance {args.edit_distance} for {len(barcodes)} barcodes.'
+    )
+
     mut_hash = mutationhash(strings = barcodes, nedit = args.edit_distance, alphabet = list(args.edit_alphabet), log = logger)
 
     bufsize = args.buffer_size
@@ -101,9 +107,9 @@ def demultiplex():
         queue_list = []
 
     for chunk in chunker_list(list(barcode_dict.keys()), args.writer_threads-1):
-        logger.debug('Creating writer queue for samples {}.'.format(','.join(chunk)))
+        logger.debug(f"Creating writer queue for samples {','.join(chunk)}.")
         q = manager.Queue()
-        q_bc_dict = dict((k, barcode_dict[k]) for k in chunk)
+        q_bc_dict = {k: barcode_dict[k] for k in chunk}
         writer_pool.apply_async(_writer, (q, q_bc_dict, args.output, args.output_file_suffix), callback = lambda x: print(x))
         queue_list.append(q)
         for bc in q_bc_dict.values():
