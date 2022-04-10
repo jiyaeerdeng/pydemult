@@ -11,7 +11,7 @@ def entryfunc(blob):
 
 def _demult_chunk(chunk, mutationhash, regex, write_unmatched, q, keep_empty = False):
     start = time.time()
-    bc_chunks = dict()
+    bc_chunks = {}
     for entry in entryfunc(chunk):
         # Ignore empty sequences
         if entry[1].decode('utf-8') == '' and not keep_empty:
@@ -42,7 +42,7 @@ def _demult_chunk(chunk, mutationhash, regex, write_unmatched, q, keep_empty = F
             else:
                 bc_chunks['unmatched'].append(entry)
     parsing = time.time()
-    for barcode in bc_chunks.keys():
+    for barcode in bc_chunks:
         fastq = reduce(lambda x, y: x + '{}\n{}\n+\n{}\n'.format(y[0].decode('utf-8'), y[1].decode('utf-8'), y[2].decode('utf-8')), bc_chunks[barcode], '')
         q[barcode].put((barcode, fastq))
     writing = time.time()
@@ -50,13 +50,14 @@ def _demult_chunk(chunk, mutationhash, regex, write_unmatched, q, keep_empty = F
 
 def _writer(q, barcodes, prefix = '', suffix = '.fastq.gz'):
     count = 0
-    handles = dict()
-    for (sample, barcode) in barcodes.items():
-        handles[barcode] = gzip.open(os.path.join(prefix, sample + suffix), 'wb')
+    handles = {
+        barcode: gzip.open(os.path.join(prefix, sample + suffix), 'wb')
+        for (sample, barcode) in barcodes.items()
+    }
 
     while 1:
         (bc, fastq) = q.get()
-        if bc == None:
+        if bc is None:
             break
         count += 1
         handles[bc].write(fastq.encode('utf-8'))

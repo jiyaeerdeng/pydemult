@@ -21,5 +21,5 @@ def buffered_blob(handle, bufsize):
         if (blob[i-1] == CHAR_PLUS) and (blob[i-2] == CHAR_NEWLINE):
             i = blob.rfind(b'\n@', 0, i-2)
 
-        backlog = blob[i+1:len(blob)]
-        yield blob[0:i]
+        backlog = blob[i+1:]
+        yield blob[:i]

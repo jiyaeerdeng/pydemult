@@ -8,23 +8,21 @@ def mutationhash(strings, nedit, alphabet = ["A", "C", "G", "T"], log = None):
     strings. values of the hash is the set of strings the substitution could
     have come from
     """
-    maxlen = max([len(string) for string in strings])
+    maxlen = max(len(string) for string in strings)
     indexes = generate_idx(maxlen, nedit, alphabet = alphabet)
-    muthash = dict()
+    muthash = {}
     for string in strings:
         if string not in muthash:
             if log is not None:
-                log.debug("Added {} -> {} to mutationhash".format(string, string))
+                log.debug(f"Added {string} -> {string} to mutationhash")
             muthash[string] = {string}
         for x in substitution_set(string, indexes):
             if x not in muthash:
                 muthash[x] = {string}
-                if log is not None:
-                    log.debug("Added {} -> {} to mutationhash ".format(x, string))
             else:
                 muthash[x].add(string)
-                if log is not None:
-                    log.debug("Added {} -> {} to mutationhash ".format(x, string))
+            if log is not None:
+                log.debug(f"Added {x} -> {string} to mutationhash ")
     return muthash
 
 def substitution_set(string, indexes):
@@ -39,7 +37,7 @@ def valid_substitution(strlen, index):
     skip performing substitutions that are outside the bounds of the string
     """
     values = index[0]
-    return all([strlen > i for i in values])
+    return all(strlen > i for i in values)
 
 def generate_idx(maxlen, nedit, alphabet = ["A", "C", "G", "T"]):
     """
@@ -51,7 +49,7 @@ def generate_idx(maxlen, nedit, alphabet = ["A", "C", "G", "T"]):
     substitutions will not change the base
     """
     indexlists = []
-    ALPHABETS = [alphabet for x in range(nedit)]
+    ALPHABETS = [alphabet for _ in range(nedit)]
     return list(itertools.product(itertools.combinations(range(maxlen), nedit),
                                   *ALPHABETS))
 
